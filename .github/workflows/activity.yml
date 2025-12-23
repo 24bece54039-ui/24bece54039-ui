@@ -1,0 +1,46 @@
+name: Test Update Every 10 Seconds
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Update README every 10 seconds
+        run: |
+          FILE="README.md"
+
+          for i in 1 2 3 4 5
+          do
+            echo "Run $i"
+
+            # ---- LeetCode Streak ----
+            STREAK=$(sed -n 's/.*<!-- STREAK -->\([0-9]*\)<!-- STREAK -->.*/\1/p' $FILE)
+            STREAK=${STREAK:-0}
+            NEW_STREAK=$((STREAK + 1))
+            sed -i "s/<!-- STREAK -->$STREAK<!-- STREAK -->/<!-- STREAK -->$NEW_STREAK<!-- STREAK -->/" $FILE
+
+            # ---- Coding Hours (6–9) ----
+            HOURS=$((RANDOM % 4 + 6))
+            sed -i "s/<!-- HOURS -->[0-9]*<!-- HOURS -->/<!-- HOURS -->$HOURS<!-- HOURS -->/" $FILE
+
+            # ---- Contributions (5–20) ----
+            CONTRIB=$((RANDOM % 16 + 5))
+            sed -i "s/<!-- CONTRIB -->[0-9]*<!-- CONTRIB -->/<!-- CONTRIB -->$CONTRIB<!-- CONTRIB -->/" $FILE
+
+            git config user.name "jaymeen07-r"
+            git config user.email "jaymeen07-r@users.noreply.github.com"
+            git add README.md
+            git commit -m "🧪 Test update $i"
+            git push
+
+            sleep 10
+          done
